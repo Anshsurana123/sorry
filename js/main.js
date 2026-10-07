@@ -88,18 +88,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Envelope Opening Interaction
+  // Envelope Opening Interaction - Click anywhere on the letter to open it!
   const envelope = document.getElementById('envelope-wrapper');
   const letterContent = document.getElementById('letter-content');
   const openSealBtn = document.getElementById('envelope-seal-btn');
+  const closedBanner = document.querySelector('.envelope-closed-banner');
 
-  if (openSealBtn && envelope && letterContent) {
-    openSealBtn.addEventListener('click', () => {
+  const openLetter = () => {
+    if (envelope && !envelope.classList.contains('is-opened')) {
+      envelope.classList.add('is-opened');
+      if (window.soundEngine) window.soundEngine.playSparkle();
+      window.boostHeartWarmth(20);
+      triggerGentleHearts();
+    }
+  };
+
+  if (openSealBtn) openSealBtn.addEventListener('click', openLetter);
+  if (closedBanner) closedBanner.addEventListener('click', openLetter);
+  if (envelope) {
+    envelope.addEventListener('click', (e) => {
       if (!envelope.classList.contains('is-opened')) {
-        envelope.classList.add('is-opened');
-        if (window.soundEngine) window.soundEngine.playSparkle();
-        window.boostHeartWarmth(20);
-        triggerGentleHearts();
+        openLetter();
       }
     });
   }
