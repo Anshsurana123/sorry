@@ -230,6 +230,7 @@ body {
   margin: 0 auto 36px;
   position: relative;
   text-align: center;
+  touch-action: pan-y !important;
 }
 
 .teddy-canvas-container {
@@ -238,7 +239,12 @@ body {
   margin: 0 auto;
   cursor: grab;
   position: relative;
-  touch-action: none;
+  touch-action: pan-y !important;
+}
+
+.teddy-canvas-container canvas {
+  touch-action: pan-y !important;
+  display: block;
 }
 
 .teddy-canvas-container:active {
@@ -1127,6 +1133,8 @@ body {
 /* Responsive tweaks */
 @media (max-width: 640px) {
   .hero-title { font-size: 1.85rem; }
+  .teddy-stage-card { padding: 18px 14px 16px; touch-action: pan-y !important; }
+  .teddy-canvas-container { height: 320px; touch-action: pan-y !important; }
   .teddy-controls-grid { grid-template-columns: repeat(2, 1fr); }
   .cat-stage-row { flex-direction: column; text-align: center; }
   .cat-speech-bubble::before { display: none; }

@@ -52,17 +52,6 @@ class TeddyBearScene {
       }
     }, 150);
 
-    // Controls
-    if (window.THREE && THREE.OrbitControls) {
-      this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.05;
-      this.controls.maxPolarAngle = Math.PI / 2 + 0.1;
-      this.controls.minDistance = 3.5;
-      this.controls.maxDistance = 7.0;
-      this.controls.enablePan = false;
-    }
-
     // Lights
     this.setupLights();
 
@@ -406,8 +395,65 @@ class TeddyBearScene {
     };
 
     window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) onPointerMove(e.touches[0]);
+
+    // Desktop mouse drag rotation
+    let isMouseDown = false;
+    let prevMouseX = 0;
+    let dragDistance = 0;
+
+    this.container.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      prevMouseX = e.clientX;
+      dragDistance = 0;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      const deltaX = e.clientX - prevMouseX;
+      dragDistance += Math.abs(deltaX);
+      if (this.teddyGroup) {
+        this.teddyGroup.rotation.y += deltaX * 0.012;
+      }
+      prevMouseX = e.clientX;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMouseDown && dragDistance < 6) {
+        // Quick click without drag -> trigger hug!
+        this.triggerHug();
+      }
+      isMouseDown = false;
+    });
+
+    // Mobile / Touch:
+    // Allow pure native scrolling! A quick tap (minimal movement) triggers hug
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
+
+    this.container.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }
+    }, { passive: true });
+
+    this.container.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const dx = Math.abs(e.touches[0].clientX - touchStartX);
+        const dy = Math.abs(e.touches[0].clientY - touchStartY);
+        if (dx > 8 || dy > 8) {
+          touchMoved = true;
+        }
+      }
+    }, { passive: true });
+
+    this.container.addEventListener('touchend', () => {
+      // If it was just a quick tap and not a scroll gesture, hug teddy!
+      if (!touchMoved) {
+        this.triggerHug();
+      }
     }, { passive: true });
   }
 
@@ -449,8 +495,6 @@ class TeddyBearScene {
     requestAnimationFrame(this.animate);
     const delta = this.clock.getDelta();
     const time = this.clock.getElapsedTime();
-
-    if (this.controls) this.controls.update();
 
     // Smooth mouse interpolation
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
